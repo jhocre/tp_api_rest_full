@@ -1,2 +1,4 @@
-.idea*
-.app_old.js
+.idea/
+/node_modules/
+/myapp/node_modules/
+
