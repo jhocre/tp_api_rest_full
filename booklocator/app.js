@@ -1,5 +1,4 @@
 var express = require('express');
-var books = require('./routes/books');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -24,7 +23,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/users', users);
-app.use('/books', books);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -43,9 +41,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-app.get('/', function (req, res) {
-    res.send('Hello World')
-});
 app.listen(3000, function () {
     console.log('Example app listening on port 3000!');
 });
