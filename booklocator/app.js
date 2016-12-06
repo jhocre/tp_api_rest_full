@@ -7,7 +7,6 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
-
 var app = express();
 
 // view engine setup
@@ -31,7 +30,6 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
-
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
@@ -42,14 +40,13 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
-
 app.get('/', function (req, res) {
     res.send('Hello World')
 });
-
 app.listen(3000, function () {
     console.log('Example app listening on port 3000!');
 });
-
 module.exports = app;
+
+
+
