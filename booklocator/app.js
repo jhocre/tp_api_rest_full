@@ -1,16 +1,14 @@
-var express = require('express'),
+var express = require('express');
+var books = require('./routes/books');
+var path = require('path');
+var favicon = require('serve-favicon');
+var logger = require('morgan');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var index = require('./routes/index');
+var users = require('./routes/users');
+var app = express();
 
-    books = require('./routes/books'),
-    path = require('path'),
-    favicon = require('serve-favicon'),
-    logger = require('morgan'),
-    cookieParser = require('cookie-parser'),
-    bodyParser = require('body-parser'),
-
-    index = require('./routes/index'),
-    users = require('./routes/users'),
-
-    app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -34,7 +32,6 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
-
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
@@ -46,5 +43,10 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-app.listen(3000);
-console.log('Listening on port 3000...');
+app.get('/', function (req, res) {
+    res.send('Hello World')
+});
+app.listen(3000, function () {
+    console.log('Example app listening on port 3000!');
+});
+module.exports = app;
