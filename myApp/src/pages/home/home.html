@@ -1,0 +1,21 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Book Read Check</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+
+  <p>To ckeck yout list of books and see which are the ones you never read please connect :</p>
+  <form (ngSubmit)="logForm()">
+      <ion-item>
+        <ion-label>Login</ion-label>
+        <ion-input type="text" [(ngModel)]="todo.name" name="name"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label>Password</ion-label>
+        <ion-textarea [(ngModel)]="todo.password" name="password"></ion-textarea>
+      </ion-item>
+      <button ion-button type="submit" block>connect</button>
+    </form>
+</ion-content>
