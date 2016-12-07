@@ -13,7 +13,10 @@ var auth = require('./routes/auth')(app);
 var mongoose = require('mongoose');
 
 var port = process.env.PORT || 8080;
-mongoose.connect('mongodb://localhost/nicodb');
+var books = require('./routes/books');
+
+// Connect to MongoDB and create/use database called todoAppTest
+mongoose.connect('mongodb://localhost/data');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -30,6 +33,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.use('/users', users);
 app.use('/auth', auth);
+app.use('/books', books);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
