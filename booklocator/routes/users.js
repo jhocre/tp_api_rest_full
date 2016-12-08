@@ -14,6 +14,7 @@ router.route("/").get(function (req, res) {
         res.json(response);
     })
 });
+
 router.route("/").post(function (req, res) {
     var db = new userDB();
     var response = {};

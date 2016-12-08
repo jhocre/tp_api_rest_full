@@ -1,17 +1,20 @@
 var express = require('express');
+var app = express();
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
 var index = require('./routes/index');
 var users = require('./routes/users');
-var books = require('./routes/books');
-var app = express();
 
-// Load mongoose package
+app.set("secret", "somerandomstring");
+var auth = require('./routes/auth')(app);
 var mongoose = require('mongoose');
+
+var port = process.env.PORT || 8080;
+var books = require('./routes/books');
+
 // Connect to MongoDB and create/use database called todoAppTest
 mongoose.connect('mongodb://localhost/data');
 
@@ -29,6 +32,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/users', users);
+app.use('/auth', auth);
 app.use('/books', books);
 
 // catch 404 and forward to error handler
@@ -47,13 +51,8 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-app.get('/', function (req, res) {
-    res.send('Hello World')
-});
+
 app.listen(3000, function () {
     console.log('Example app listening on port 3000!');
 });
 module.exports = app;
-
-
-
