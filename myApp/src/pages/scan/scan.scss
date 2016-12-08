@@ -1,4 +1,4 @@
-page-about {
+page-scan {
     text-align: center;
     h2, p{
         padding-bottom: 20px;
@@ -8,6 +8,9 @@ page-about {
         padding: 15px;
         width: 60%;
         border: 3px solid grey;
+    }
+    form{
+        display: none;
     }
 }
 

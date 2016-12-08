@@ -1,12 +1,15 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      Check my book
+      Checking
     </ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
+
+<button ion-button primary (click)="scan()">Scan your Code Bar</button>
+
 <img src="assets/img/isbn.png">
   <form (ngSubmit)="logForm()">
       <ion-item>
@@ -14,5 +17,5 @@
         <ion-textarea [(ngModel)]="todo.isbn" name="isbn"></ion-textarea>
       </ion-item>
       <button ion-button type="submit" block>Submit</button>
-    </form>
+  </form>
 </ion-content>
