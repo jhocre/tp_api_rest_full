@@ -3,7 +3,6 @@ var router = express.Router();
 var bookDB = require('../model/bookDb');
 var userDB = require('../model/userDb');
 var request = require("sync-request");
-
 function getIsbnQuery(isbn) {
     if (isbn.length == 10) {
        return {isbn10: isbn};
@@ -47,23 +46,26 @@ function moveToRead(bookId,req) {
 }
 
 function addToUnread(bookId, req) {
+    var response = {};
     userDB.findById(req.user, function (err, user) {
         if (err) {
-            return {"error": true, "message": "Error fetching data"};
+            response = {"error": true, "message": "Error fetching data"};
         }
 
         if (!user) {
-            return {"error": false, "message": "User not in database"};
+            response = {"error": false, "message": "User not in database"};
         } else {
             user.unread.push(bookId);
             user.save(function (err) {
                 if (err) {
-                    return {"error": true, "message": "Error fetching data"};
+                    response = {"error": true, "message": "Error fetching data"};
+                } else {
+                    response = {"error": false, "message": "Book moved to read"};
                 }
-                return {"error": false, "message": "Book moved to read"};
             });
         }
     });
+    return response;
 }
 
 router.route("/").get(function (req, res) {
@@ -86,7 +88,7 @@ var response = {};
         function (err, user) {
             if (err) throw err;
             if(user){
-                var bookISBN=req.param('bookISBN');
+                var bookISBN=req.param('isbn');
                 var bookData=getBookbyISBN(bookISBN);
             }
             else{
@@ -102,9 +104,8 @@ var response = {};
                             res.json({"error": true, "message": "Error fetching data"});
                         } else {
                             if (!data) {
-                                response=data;
+                                response=bookData;
                                 var bookdb = new bookDB;
-                                console.log(bookdb._id);
                                 bookdb.title=response.data[0].title;
                                 bookdb.isbn13=response.data[0].isbn13;
                                 bookdb.isbn10=response.data[0].isbn10;
@@ -112,11 +113,11 @@ var response = {};
                                     if (err) {
                                         response = {"error": true, "message": "Error adding data"};
                                     } else {
-
-                                        addToUnread(bookdb._id, req);
+                                        var retour = addToUnread(bookdb._id, req);
                                         response = {"error": false, "message": "books added"};
                                     }
                                 })
+
                             } else {
                                 res.json({"error": false, "message": data});
                             }
@@ -130,27 +131,6 @@ var response = {};
         }
     );
 });
-
-
-/*router.route("/").post(function (req, res) {
-    var db = new bookDB();
-    var response = {};
-    db.isbn13 = req.body.isbn13;
-    db.isbn10 = req.body.isbn10;
-    db.title = req.body.title;
-    db.save(function (err) {
-        if (err) {
-            response = {"error": true, "message": "Error adding data"};
-        } else {
-            response = addToUnread(db._id,req);
-            console.log(response);
-            if (!response.error) {
-                response = {"error": false, "message": "Data added"};
-            }
-        }
-        res.json(response);
-    });
-});*/
 
 router.route("/:id").put(function (req,res) {
     res.json(moveToRead(req.params.id, req));
