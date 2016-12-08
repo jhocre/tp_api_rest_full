@@ -5,17 +5,21 @@
 </ion-header>
 
 <ion-content padding>
+  <div id="notConnected">
+    <p>To ckeck yout list of books and see which are the ones you never read please connect :</p>
 
-  <p>To ckeck yout list of books and see which are the ones you never read please connect :</p>
-  <form (ngSubmit)="logForm()">
-      <ion-item>
-        <ion-label>Login</ion-label>
-        <ion-input type="text" [(ngModel)]="todo.name" name="name"></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-label>Password</ion-label>
-        <ion-textarea [(ngModel)]="todo.password" name="password"></ion-textarea>
-      </ion-item>
-      <button ion-button type="submit" block>connect</button>
-    </form>
+    <button ion-button primary (click)="connect()">Connect to your account</button>
+  </div>
+
+  <div id="connected" style="display:none">
+    <hr>
+    <button ion-button primary (click)="scan()">Scan your Code Bar</button>
+
+    <img src="assets/img/isbn.png">
+
+    <button id="enter" ion-button primary (click)="enter()">Enter the ISBN manually</button>
+
+    <button ion-button primary (click)="check()">Check your book list</button>
+  </div>
+
 </ion-content>

@@ -1,12 +1,17 @@
 page-home {
-    text-align: center;
+  text-align: center;
 
-    h2{
-        padding-bottom: 20px;
-    }
+  #notConnected{
+    margin-top: 40%;
+  }
 
-    p{
-        border: 1px solid red;
-        padding: 15px 10px;
-    }
+  img {
+    margin-top: 15px;
+    padding: 15px;
+    width: 60%;
+    border: 3px solid grey;
+  }
+  button {
+    margin-bottom: 20px;
+  }
 }
