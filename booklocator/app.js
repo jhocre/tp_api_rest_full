@@ -16,7 +16,7 @@ var auth = require('./routes/auth')(app);
 
 app.set("secret", "somerandomstring");
 
-app.use(expressJwt({ secret: app.get('secret') }).unless({ path: [ '/auth' ]}));
+app.use(expressJwt({ secret: app.get('secret') }).unless({ path: [ '/auth' , '/auth/create']}));
 
 // Connect to MongoDB and create/use database called todoAppTest
 mongoose.connect('mongodb://localhost/nicodb');

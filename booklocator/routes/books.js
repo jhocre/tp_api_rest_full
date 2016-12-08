@@ -2,8 +2,7 @@ var express = require('express');
 var router = express.Router();
 var bookDB = require('../model/bookDb');
 var userDB = require('../model/userDb');
-var jwt = require('jsonwebtoken');
-
+var request = require("sync-request");
 function getIsbnQuery(isbn) {
     if (isbn.length == 10) {
        return {isbn10: isbn};
@@ -14,8 +13,15 @@ function getIsbnQuery(isbn) {
     }
 }
 
-function moveToRead(isbn,req) {
-    userDB.findById(req.user._id, function (err, user) {
+function getBookbyISBN(isbn) {
+    var url='http://isbndb.com/api/v2/json/I347A80O/book/'+isbn;
+
+    var data = request('get',url)
+    return JSON.parse(data.getBody('utf-8'));
+}
+
+function moveToRead(bookId,req) {
+    userDB.findById(req.user, function (err, user) {
         if (err) {
             return {"error": true, "message": "Error fetching data"};
         }
@@ -24,11 +30,11 @@ function moveToRead(isbn,req) {
             return {"error": false, "message": "User not in database"}
         } else {
 
-            var index = user.unread.indexOf(isbn);
+            var index = user.unread.indexOf(bookId);
             if (index > -1) {
                 user.unread.splice(index, 1);
             }
-            user.read.push(isbn);
+            user.read.push(bookId);
             user.save(function (err, updatedUser) {
                 if (err) {
                     return {"error": true, "message": "Error fetching data"};
@@ -39,24 +45,27 @@ function moveToRead(isbn,req) {
     });
 }
 
-function addToUnread(isbn, req) {
-    userDB.findById(req.user._id, function (err, user) {
+function addToUnread(bookId, req) {
+    var response = {};
+    userDB.findById(req.user, function (err, user) {
         if (err) {
-            return {"error": true, "message": "Error fetching data"};
+            response = {"error": true, "message": "Error fetching data"};
         }
 
         if (!user) {
-            return {"error": false, "message": "User not in database"}
+            response = {"error": false, "message": "User not in database"};
         } else {
-            user.unread.push(isbn);
-            user.save(function (err, updatedUser) {
+            user.unread.push(bookId);
+            user.save(function (err) {
                 if (err) {
-                    return {"error": true, "message": "Error fetching data"};
+                    response = {"error": true, "message": "Error fetching data"};
+                } else {
+                    response = {"error": false, "message": "Book moved to read"};
                 }
-                return {"error": false, "message": "Book moved to read"};
             });
         }
     });
+    return response;
 }
 
 router.route("/").get(function (req, res) {
@@ -73,48 +82,54 @@ router.route("/").get(function (req, res) {
 
 
 
-router.route("/:id").get(function (req, res) {
-    var query = getIsbnQuery(req.params.id);
+router.route("/:isbn").get(function (req, res) {
+var response = {};
+    userDB.findById(req.user,
+        function (err, user) {
+            if (err) throw err;
+            if(user){
+                var bookISBN=req.param('isbn');
+                var bookData=getBookbyISBN(bookISBN);
+            }
+            else{
+                response={"error":true, "message":"utilisateur non enregistré" }
+            }
+            if(bookData){
 
-    if (query != null) {
-        bookDB.findOne(query, function (err, data) {
-            if (err) {
-                res.json({"error": true, "message": "Error fetching data"});
-            } else {
-                if (!data) {
-                    res.json({"error": true, "message": "Book not in database"});
-                } else {
-                    res.json({"error": false, "message": data});
+                var query = getIsbnQuery(req.params.isbn);
+
+                if (query != null) {
+                    bookDB.findOne(query, function (err, data) {
+                        if (err) {
+                            res.json({"error": true, "message": "Error fetching data"});
+                        } else {
+                            if (!data) {
+                                response=bookData;
+                                var bookdb = new bookDB;
+                                bookdb.title=response.data[0].title;
+                                bookdb.isbn13=response.data[0].isbn13;
+                                bookdb.isbn10=response.data[0].isbn10;
+                                bookdb.save(function (err) {
+                                    if (err) {
+                                        response = {"error": true, "message": "Error adding data"};
+                                    } else {
+                                        var retour = addToUnread(bookdb._id, req);
+                                        response = {"error": false, "message": "books added"};
+                                    }
+                                })
+
+                            } else {
+                                res.json({"error": false, "message": data});
+                            }
+                        }
+                    });
                 }
             }
-        });
-    }
-});
-
-
-router.route("/").post(function (req, res) {
-    var db = new bookDB();
-    var response = {};
-    db.isbn13 = req.body.isbn13;
-    db.isbn10 = req.body.isbn10;
-    db.title = req.body.title;
-    db.author = req.body.author;
-    db.summary = req.body.summary;
-    db.language = req.body.language;
-    db.subject = req.body.subject;
-    db.publisher = req.body.publisher;
-    db.edition = req.body.edition;
-    db.save(function (err) {
-        if (err) {
-            response = {"error": true, "message": "Error adding data"};
-        } else {
-            response = addToUnread(isbn,req);
-            if (!response.error) {
-                response = {"error": false, "message": "Data added"};
+            else{
+                response={"error":true, "message":"une erreur est survenue" }
             }
         }
-        res.json(response);
-    });
+    );
 });
 
 router.route("/:id").put(function (req,res) {

@@ -23,7 +23,7 @@ module.exports = function (app) {
 
                     // if user is found and password is right
                     // create a token
-                    var token = jwt.sign(user, app.get('secret'), {
+                    var token = jwt.sign(user._id.toString(), app.get('secret'), {
                         //expiresInMinutes: 1440 // expires in 24 hours
                     });
 
@@ -35,6 +35,26 @@ module.exports = function (app) {
                     });
                 }
             }
+        });
+    });
+
+    router.route("/create").post(function (req, res) {
+        var db = new userDB();
+        var response = {};
+        // fetch email and password from REST request.
+        // Add strict validation when you use this in Production.
+        db.name = req.body.name;
+        db.password = req.body.password;
+        db.save(function (err) {
+            // save() will run insert() command of MongoDB.
+            // it will add new data in collection.
+            if (err) {
+                response = {"error": true, "message": "Error adding data"};
+            } else {
+                response = {"error": false, "message": "Data added"};
+            }
+            res.json(response);
+
         });
     });
     return router;
