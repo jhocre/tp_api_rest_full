@@ -34,11 +34,8 @@ module.exports = function (app) {
                         token: token
                     });
                 }
-
             }
-
         });
     });
-
     return router;
 };
