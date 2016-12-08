@@ -1,22 +1,25 @@
+var mongoose = require('mongoose');
 var express = require('express');
+var bodyParser = require('body-parser');
+var jwt = require('jsonwebtoken');
+var expressJwt = require('express-jwt');
 var app = express();
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+
 var index = require('./routes/index');
 var users = require('./routes/users');
+var books = require('./routes/books');
+var auth = require('./routes/auth')(app);
 
 app.set("secret", "somerandomstring");
-var auth = require('./routes/auth')(app);
-var mongoose = require('mongoose');
 
-var port = process.env.PORT || 8080;
-var books = require('./routes/books');
+app.use(expressJwt({ secret: app.get('secret') }).unless({ path: [ '/auth' ]}));
 
 // Connect to MongoDB and create/use database called todoAppTest
-mongoose.connect('mongodb://localhost/data');
+mongoose.connect('mongodb://localhost/nicodb');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -31,8 +34,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
-app.use('/users', users);
 app.use('/auth', auth);
+app.use('/users', users);
 app.use('/books', books);
 
 // catch 404 and forward to error handler
@@ -41,6 +44,7 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
+
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development

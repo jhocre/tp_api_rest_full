@@ -2,6 +2,62 @@ var express = require('express');
 var router = express.Router();
 var bookDB = require('../model/bookDb');
 var userDB = require('../model/userDb');
+var jwt = require('jsonwebtoken');
+
+function getIsbnQuery(isbn) {
+    if (isbn.length == 10) {
+       return {isbn10: isbn};
+    } else if (isbn.length == 13) {
+        return {isbn13: isbn};
+    } else {
+        return null;
+    }
+}
+
+function moveToRead(isbn,req) {
+    userDB.findById(req.user._id, function (err, user) {
+        if (err) {
+            return {"error": true, "message": "Error fetching data"};
+        }
+
+        if (!user) {
+            return {"error": false, "message": "User not in database"}
+        } else {
+
+            var index = user.unread.indexOf(isbn);
+            if (index > -1) {
+                user.unread.splice(index, 1);
+            }
+            user.read.push(isbn);
+            user.save(function (err, updatedUser) {
+                if (err) {
+                    return {"error": true, "message": "Error fetching data"};
+                }
+                return {"error": false, "message": "Book moved to read"};
+            });
+        }
+    });
+}
+
+function addToUnread(isbn, req) {
+    userDB.findById(req.user._id, function (err, user) {
+        if (err) {
+            return {"error": true, "message": "Error fetching data"};
+        }
+
+        if (!user) {
+            return {"error": false, "message": "User not in database"}
+        } else {
+            user.unread.push(isbn);
+            user.save(function (err, updatedUser) {
+                if (err) {
+                    return {"error": true, "message": "Error fetching data"};
+                }
+                return {"error": false, "message": "Book moved to read"};
+            });
+        }
+    });
+}
 
 router.route("/").get(function (req, res) {
     var response = {};
@@ -15,16 +71,10 @@ router.route("/").get(function (req, res) {
     });
 });
 
+
+
 router.route("/:id").get(function (req, res) {
-    var query = {};
-    if (req.params.id.length == 10) {
-        query = {isbn10: req.params.id};
-    } else if (req.params.id.length == 13) {
-        query = {isbn13: req.params.id};
-    } else {
-        res.json({"error": true, "message": "Wrong value"});
-        query = null;
-    }
+    var query = getIsbnQuery(req.params.id);
 
     if (query != null) {
         bookDB.findOne(query, function (err, data) {
@@ -58,10 +108,17 @@ router.route("/").post(function (req, res) {
         if (err) {
             response = {"error": true, "message": "Error adding data"};
         } else {
-            response = {"error": false, "message": "Data added"};
+            response = addToUnread(isbn,req);
+            if (!response.error) {
+                response = {"error": false, "message": "Data added"};
+            }
         }
         res.json(response);
     });
+});
+
+router.route("/:id").put(function (req,res) {
+    res.json(moveToRead(req.params.id, req));
 });
 
 module.exports = router;
