@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var userDB = require('../model/userDb');
 
+
 router.route("/").get(function (req, res) {
     var response = {};
     userDB.find({}, function (err, data) {
